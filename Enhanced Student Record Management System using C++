@@ -1,0 +1,295 @@
+// Enhanced Student Record Management System using C++
+// features like : Press 1 to Enter data
+// 1 . Show data
+//2. to Search data
+//3. to Update data
+//4. to Delete data
+//5. to Save data to file
+//6. to Export data to CSV
+// Press 8 to Show statistics
+// Press 9 to Quit
+
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <algorithm>
+#include <map>
+#include <iomanip>
+using namespace std;
+
+struct Student {
+    string roll_no;
+    string name;
+    string Class;
+    string course;
+    string mobile_no;
+    string admission_year;
+};
+
+vector<Student> students;
+
+void enter() {
+    int ch = 0;
+    cout << "How many students do you want to enter?" << endl;
+    cin >> ch;
+    for(int i = 0; i < ch; i++) {
+        Student s;
+        cout << "\nEnter the Data of student " << i+1 << endl << endl;
+        cout << "Enter Roll NO: ";
+        cin >> s.roll_no;
+        cout << "Enter Name: ";
+        cin.ignore();
+        getline(cin, s.name);
+        cout << "Enter Class: ";
+        getline(cin, s.Class);
+        cout << "Enter Course: ";
+        getline(cin, s.course);
+        cout << "Enter Mobile NO: ";
+        cin >> s.mobile_no;
+        cout << "Enter Admission Year: ";
+        cin >> s.admission_year;
+
+        students.push_back(s);
+    }
+}
+
+void show() {
+    if(students.empty()) {
+        cout << "No Data is Entered" << endl;
+    } else {
+        cout << left << setw(10) << "Roll NO"
+             << setw(20) << "Name"
+             << setw(10) << "Class"
+             << setw(15) << "Course"
+             << setw(15) << "Mobile NO"
+             << setw(15) << "Admission Year" << endl;
+        cout << "---------------------------------------------------------------------------------------" << endl;
+
+        for(size_t i = 0; i < students.size(); i++) {
+            cout << left << setw(10) << students[i].roll_no
+                 << setw(20) << students[i].name
+                 << setw(10) << students[i].Class
+                 << setw(15) << students[i].course
+                 << setw(15) << students[i].mobile_no
+                 << setw(15) << students[i].admission_year << endl;
+        }
+    }
+}
+
+void search() {
+    if(students.empty()) {
+        cout << "No data is entered" << endl;
+    } else {
+        string search_term;
+        cout << "Enter the roll no or name of student" << endl;
+        cin.ignore();
+        getline(cin, search_term);
+        bool found = false;
+        for(const auto& student : students) {
+            if(search_term == student.roll_no || search_term == student.name) {
+                cout << "Roll NO: " << student.roll_no << endl;
+                cout << "Name: " << student.name << endl;
+                cout << "Class: " << student.Class << endl;
+                cout << "Course: " << student.course << endl;
+                cout << "Mobile NO: " << student.mobile_no << endl;
+                cout << "Admission Year: " << student.admission_year << endl;
+                found = true;
+            }
+        }
+        if(!found) {
+            cout << "No student found with Roll NO or Name: " << search_term << endl;
+        }
+    }
+}
+
+void update() {
+    if(students.empty()) {
+        cout << "No data is entered" << endl;
+    } else {
+        string rollno;
+        cout << "Enter the roll no of student which you want to update" << endl;
+        cin >> rollno;
+        bool found = false;
+        for(auto& student : students) {
+            if(rollno == student.roll_no) {
+                cout << "\nPrevious data" << endl << endl;
+                cout << "Data of Student" << endl;
+                cout << "Roll NO: " << student.roll_no << endl;
+                cout << "Name: " << student.name << endl;
+                cout << "Class: " << student.Class << endl;
+                cout << "Course: " << student.course << endl;
+                cout << "Mobile NO: " << student.mobile_no << endl;
+                cout << "Admission Year: " << student.admission_year << endl;
+                cout << "\nEnter new data" << endl << endl;
+                cout << "Enter Roll NO: ";
+                cin >> student.roll_no;
+                cout << "Enter Name: ";
+                cin.ignore();
+                getline(cin, student.name);
+                cout << "Enter Class: ";
+                getline(cin, student.Class);
+                cout << "Enter Course: ";
+                getline(cin, student.course);
+                cout << "Enter Mobile NO: ";
+                cin >> student.mobile_no;
+                cout << "Enter Admission Year: ";
+                cin >> student.admission_year;
+                found = true;
+                break;
+            }
+        }
+        if(!found) {
+            cout << "No student found with Roll NO: " << rollno << endl;
+        }
+    }
+}
+
+void Delete() {
+    if(students.empty()) {
+        cout << "No data is entered yet" << endl;
+    } else {
+        int a;
+        cout << "Are you Sure to Delete Data?" << endl;
+        cout << "Press 1 to delete all records" << endl;
+        cin >> a;
+        if(a == 1) {
+            students.clear();
+            cout << "All records are deleted..!!" << endl;
+        } else {
+            cout << "Please Press 1 to Delete All Records" << endl;
+        }
+    }
+}
+
+void saveToFile() {
+    ofstream outFile("students.txt");
+    for(const auto& student : students) {
+        outFile << student.roll_no << "|"
+                << student.name << "|"
+                << student.Class << "|"
+                << student.course << "|"
+                << student.mobile_no << "|"
+                << student.admission_year << endl;
+    }
+    outFile.close();
+    cout << "Data saved to file successfully." << endl;
+}
+
+void loadFromFile() {
+    ifstream inFile("students.txt");
+    string line;
+    while(getline(inFile, line)) {
+        Student s;
+        size_t pos = 0;
+        string token;
+        int field = 0;
+        while ((pos = line.find("|")) != string::npos) {
+            token = line.substr(0, pos);
+            switch(field) {
+                case 0: s.roll_no = token; break;
+                case 1: s.name = token; break;
+                case 2: s.Class = token; break;
+                case 3: s.course = token; break;
+                case 4: s.mobile_no = token; break;
+                case 5: s.admission_year = token; break;
+            }
+            line.erase(0, pos + 1);
+            field++;
+        }
+        students.push_back(s);
+    }
+    inFile.close();
+    cout << "Data loaded from file successfully." << endl;
+}
+
+void exportToCSV() {
+    ofstream outFile("students.csv");
+    outFile << "Roll NO,Name,Class,Course,Mobile NO,Admission Year\n";
+    for(const auto& student : students) {
+        outFile << student.roll_no << ","
+                << student.name << ","
+                << student.Class << ","
+                << student.course << ","
+                << student.mobile_no << ","
+                << student.admission_year << endl;
+    }
+    outFile.close();
+    cout << "Data exported to CSV successfully." << endl;
+}
+
+void showStatistics() {
+    if(students.empty()) {
+        cout << "No data is entered" << endl;
+        return;
+    }
+
+    int total_students = students.size();
+    map<string, int> course_count;
+    map<string, int> class_count;
+
+    for(const auto& student : students) {
+        course_count[student.course]++;
+        class_count[student.Class]++;
+    }
+
+    cout << "\nStudent Statistics:" << endl;
+    cout << "Total number of students: " << total_students << endl;
+    cout << "\nStudents per course:" << endl;
+    for(const auto& course : course_count) {
+        cout << course.first << ": " << course.second << endl;
+    }
+    cout << "\nStudents per class:" << endl;
+    for(const auto& class_item : class_count) {
+        cout << class_item.first << ": " << class_item.second << endl;
+    }
+}
+
+int main() {
+    loadFromFile();
+    int value;
+    while(true) {
+        cout << "\nPress 1 to Enter data" << endl;
+        cout << "Press 2 to Show data" << endl;
+        cout << "Press 3 to Search data" << endl;
+        cout << "Press 4 to Update data" << endl;
+        cout << "Press 5 to Delete data" << endl;
+        cout << "Press 6 to Save data to file" << endl;
+        cout << "Press 7 to Export data to CSV" << endl;
+        cout << "Press 8 to Show statistics" << endl;
+        cout << "Press 9 to Quit" << endl;
+        cin >> value;
+        switch(value) {
+            case 1:
+                enter();
+                break;
+            case 2:
+                show();
+                break;
+            case 3:
+                search();
+                break;
+            case 4:
+                update();
+                break;
+            case 5:
+                Delete();
+                break;
+            case 6:
+                saveToFile();
+                break;
+            case 7:
+                exportToCSV();
+                break;
+            case 8:
+                showStatistics();
+                break;
+            case 9:
+                saveToFile();
+                exit(0);
+                break;
+            default:
+                cout << "Invalid input" << endl;
+                break;
+        }
+    }
+}
